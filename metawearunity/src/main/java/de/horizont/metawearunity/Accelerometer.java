@@ -10,33 +10,29 @@ import com.mbientlab.metawear.data.Acceleration;
 
 import bolts.Continuation;
 
-public class Accelerometer {
-    private static String TAG = "Accelerometer";
-
-    private com.mbientlab.metawear.module.Accelerometer accelerometer;
-    private Activity activity;
+public class Accelerometer extends AbstractSensor<Accelerometer, com.mbientlab.metawear.module.Accelerometer, IAccelerometerHandler> {
+    private static String TAG = "MetaWearAccelerometer";
 
     public Accelerometer(Activity activity, MetaWearBoard board) {
-        this.accelerometer = board.getModule(com.mbientlab.metawear.module.Accelerometer.class);
-        this.activity = activity;
+        super(activity, board, com.mbientlab.metawear.module.Accelerometer.class);
     }
 
     public void Start (final IAccelerometerHandler handler)
     {
         Log.d(TAG, "Accelerometer.Start");
 
-        accelerometer.acceleration().addRouteAsync(source -> source.stream((Subscriber) (data, env) -> {
+        sensor.acceleration().addRouteAsync(source -> source.stream((Subscriber) (data, env) -> {
             Acceleration acceleration = data.value(Acceleration.class);
             float x = acceleration.x();
             float y = acceleration.y();
-            final float z = acceleration.z();
+            float z = acceleration.z();
 
             Log.i(TAG, "Accelerometer.acceperation " + x + " " + y + " " + z);
 
             activity.runOnUiThread(() -> handler.OnNewValue(x, y, z));
         })).continueWith((Continuation<Route, Void>) task -> {
-            accelerometer.acceleration().start();
-            accelerometer.start();
+            sensor.acceleration().start();
+            sensor.start();
             return null;
         });
     }
@@ -44,6 +40,6 @@ public class Accelerometer {
     public void Stop ()
     {
         Log.d(TAG, "Accelerometer.Stop");
-        accelerometer.stop();
+        sensor.stop();
     }
 }

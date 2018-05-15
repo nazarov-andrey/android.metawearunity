@@ -1,1 +1,1 @@
-include ':app', ':metawearunity', ':MetaWearSDK'
+include ':app', ':metawearunity', ':MetaWearSDK', ':activitylifecycle'
