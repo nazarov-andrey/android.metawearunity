@@ -27,18 +27,22 @@ public class MetaWearManager implements IActivityLifecycleHandler, ServiceConnec
     private BtleService.LocalBinder serviceBinder;
     private BluetoothAdapter bluetoothAdapter;
     private Handler handler;
+    private Runnable serviceConnectedCallback;
 
-    public MetaWearManager(Activity activity) {
+    public MetaWearManager(Activity activity, Runnable serviceConnectedCallback) {
+        Log.d(TAG, "MetaWearManager");
+
         this.activity = activity;
+        this.serviceConnectedCallback = serviceConnectedCallback;
+
+        activity
+                .getApplication()
+                .bindService(new Intent(activity, BtleService.class),
+                        this, Context.BIND_AUTO_CREATE);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "MetaWearManager.onCreate");
-        activity
-                .getApplication()
-                .bindService(new Intent(activity, BtleService.class),
-                    this, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -77,6 +81,9 @@ public class MetaWearManager implements IActivityLifecycleHandler, ServiceConnec
     public void onServiceConnected(ComponentName name, IBinder service) {
         Log.d(TAG, "MetaWearManager.onServiceConnected");
         serviceBinder = (BtleService.LocalBinder) service;
+
+        if (serviceConnectedCallback != null)
+            activity.runOnUiThread(serviceConnectedCallback);
     }
 
     @Override
