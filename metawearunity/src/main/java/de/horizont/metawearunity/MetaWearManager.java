@@ -32,6 +32,7 @@ public class MetaWearManager implements IActivityLifecycleHandler, ServiceConnec
     public MetaWearManager(Activity activity, Runnable serviceConnectedCallback) {
         Log.d(TAG, "MetaWearManager");
 
+        this.handler = new Handler();
         this.activity = activity;
         this.serviceConnectedCallback = serviceConnectedCallback;
 
@@ -83,7 +84,7 @@ public class MetaWearManager implements IActivityLifecycleHandler, ServiceConnec
         serviceBinder = (BtleService.LocalBinder) service;
 
         if (serviceConnectedCallback != null)
-            activity.runOnUiThread(serviceConnectedCallback);
+            handler.post(serviceConnectedCallback);
     }
 
     @Override
@@ -114,33 +115,33 @@ public class MetaWearManager implements IActivityLifecycleHandler, ServiceConnec
 
         board.connectAsync().continueWith((Continuation<Void, Void>) task -> {
             if (task.isFaulted()) {
-                activity.runOnUiThread(() -> handler.OnFailed());
+                this.handler.post(() -> handler.OnFailed());
             } else {
-                activity.runOnUiThread(() -> handler.OnConnected());
+                this.handler.post(() -> handler.OnConnected());
             }
             return null;
         });
 
-        board.onUnexpectedDisconnect(status -> activity.runOnUiThread(() -> handler.OnUnexpectedDisconnect()));
+        board.onUnexpectedDisconnect(status -> this.handler.post(() -> handler.OnUnexpectedDisconnect()));
     }
 
     public de.horizont.metawearunity.Accelerometer GetAcceleromenter (MetaWearBoard board)
     {
-        return new de.horizont.metawearunity.Accelerometer(activity, board);
+        return new de.horizont.metawearunity.Accelerometer(handler, board);
     }
 
     public Magnetometer GetMagnetometer (MetaWearBoard board)
     {
-        return new Magnetometer(activity, board);
+        return new Magnetometer(handler, board);
     }
 
     public Gyro GetGyro (MetaWearBoard board)
     {
-        return new Gyro(activity, board);
+        return new Gyro(handler, board);
     }
 
     public Light GetLight (MetaWearBoard board)
     {
-        return new Light(activity, board);
+        return new Light(handler, board);
     }
 }

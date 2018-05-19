@@ -1,6 +1,6 @@
 package de.horizont.metawearunity;
 
-import android.app.Activity;
+import android.os.Handler;
 import android.util.Log;
 
 import com.mbientlab.metawear.MetaWearBoard;
@@ -13,8 +13,8 @@ import bolts.Continuation;
 public class Accelerometer extends AbstractSensor<Accelerometer, com.mbientlab.metawear.module.Accelerometer, IAccelerometerHandler> {
     private static String TAG = "MetaWearAccelerometer";
 
-    public Accelerometer(Activity activity, MetaWearBoard board) {
-        super(activity, board, com.mbientlab.metawear.module.Accelerometer.class);
+    public Accelerometer(Handler handler, MetaWearBoard board) {
+        super(handler, board, com.mbientlab.metawear.module.Accelerometer.class);
     }
 
     public void Start (final IAccelerometerHandler handler)
@@ -29,7 +29,7 @@ public class Accelerometer extends AbstractSensor<Accelerometer, com.mbientlab.m
 
             Log.i(TAG, "Accelerometer.acceperation " + x + " " + y + " " + z);
 
-            activity.runOnUiThread(() -> handler.OnNewValue(x, y, z));
+            this.handler.post(() -> handler.OnNewValue(x, y, z));
         })).continueWith((Continuation<Route, Void>) task -> {
             sensor.acceleration().start();
             sensor.start();

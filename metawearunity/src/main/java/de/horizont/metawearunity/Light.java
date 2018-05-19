@@ -1,6 +1,6 @@
 package de.horizont.metawearunity;
 
-import android.app.Activity;
+import android.os.Handler;
 import android.util.Log;
 
 import com.mbientlab.metawear.MetaWearBoard;
@@ -13,8 +13,8 @@ import bolts.Continuation;
 public class Light extends AbstractSensor<Light, AmbientLightLtr329, ILightHandler> {
     private static String TAG = "MetaWearLight";
 
-    public Light(Activity activity, MetaWearBoard board) {
-        super(activity, board, AmbientLightLtr329.class);
+    public Light(Handler handler, MetaWearBoard board) {
+        super(handler, board, AmbientLightLtr329.class);
     }
 
     @Override
@@ -25,7 +25,7 @@ public class Light extends AbstractSensor<Light, AmbientLightLtr329, ILightHandl
 
             Log.i(TAG, "Light.light " + light);
 
-            activity.runOnUiThread(() -> handler.OnNewValue(light));
+            this.handler.post(() -> handler.OnNewValue(light));
         })).continueWith((Continuation<Route, Void>) task -> {
             sensor.illuminance().start();
             return null;

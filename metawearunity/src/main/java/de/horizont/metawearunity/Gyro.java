@@ -1,6 +1,7 @@
 package de.horizont.metawearunity;
 
 import android.app.Activity;
+import android.os.Handler;
 import android.util.Log;
 
 import com.mbientlab.metawear.MetaWearBoard;
@@ -14,8 +15,8 @@ import bolts.Continuation;
 public class Gyro extends AbstractSensor<Gyro, GyroBmi160, IGyroHandler> {
     private static String TAG = "MetaWearGyro";
 
-    public Gyro(Activity activity, MetaWearBoard board) {
-        super(activity, board, GyroBmi160.class);
+    public Gyro(Handler handler, MetaWearBoard board) {
+        super(handler, board, GyroBmi160.class);
     }
 
     @Override
@@ -29,7 +30,7 @@ public class Gyro extends AbstractSensor<Gyro, GyroBmi160, IGyroHandler> {
 
             Log.i(TAG, "Gyro.angularVelocity " + x + " " + y + " " + z);
 
-            activity.runOnUiThread(() -> handler.OnNewValue(x, y, z));
+            this.handler.post(() -> handler.OnNewValue(x, y, z));
         })).continueWith((Continuation<Route, Void>) task -> {
             sensor.angularVelocity();
             sensor.start();
