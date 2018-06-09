@@ -13,13 +13,13 @@ import bolts.Continuation;
 public class Accelerometer extends AbstractSensor<Accelerometer, com.mbientlab.metawear.module.Accelerometer, IAccelerometerHandler> {
     private static String TAG = "MetaWearAccelerometer";
 
-    public Accelerometer(Handler handler, MetaWearBoard board) {
-        super(handler, board, com.mbientlab.metawear.module.Accelerometer.class);
+    public Accelerometer(Handler handler, MetaWearBoard board, boolean loggable) {
+        super(handler, board, com.mbientlab.metawear.module.Accelerometer.class, loggable);
     }
 
     public void Start (final IAccelerometerHandler handler)
     {
-        Log.d(TAG, "Accelerometer.Start");
+        Log("Accelerometer.Start");
 
         sensor.acceleration().addRouteAsync(source -> source.stream((Subscriber) (data, env) -> {
             Acceleration acceleration = data.value(Acceleration.class);
@@ -27,7 +27,7 @@ public class Accelerometer extends AbstractSensor<Accelerometer, com.mbientlab.m
             float y = acceleration.y();
             float z = acceleration.z();
 
-            Log.i(TAG, "Accelerometer.acceperation " + x + " " + y + " " + z);
+            Log("Accelerometer.acceperation " + x + " " + y + " " + z);
 
             this.handler.post(() -> handler.OnNewValue(x, y, z));
         })).continueWith((Continuation<Route, Void>) task -> {
@@ -39,7 +39,7 @@ public class Accelerometer extends AbstractSensor<Accelerometer, com.mbientlab.m
 
     public void Stop ()
     {
-        Log.d(TAG, "Accelerometer.Stop");
+        Log("Accelerometer.Stop");
         sensor.stop();
     }
 }

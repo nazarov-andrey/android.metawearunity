@@ -28,18 +28,25 @@ public class MetaWearManager implements IActivityLifecycleHandler, ServiceConnec
     private BluetoothAdapter bluetoothAdapter;
     private Handler handler;
     private Runnable serviceConnectedCallback;
+    private boolean loggable;
 
-    public MetaWearManager(Activity activity, Runnable serviceConnectedCallback) {
-        Log.d(TAG, "MetaWearManager");
+    public MetaWearManager(Activity activity, Runnable serviceConnectedCallback, boolean loggable) {
+        Log("MetaWearManager");
 
         this.handler = new Handler();
         this.activity = activity;
         this.serviceConnectedCallback = serviceConnectedCallback;
+        this.loggable = loggable;
 
         activity
                 .getApplication()
                 .bindService(new Intent(activity, BtleService.class),
                         this, Context.BIND_AUTO_CREATE);
+    }
+
+    private void Log (String message)
+    {
+        Log.d(TAG, message);
     }
 
     @Override
@@ -80,7 +87,7 @@ public class MetaWearManager implements IActivityLifecycleHandler, ServiceConnec
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        Log.d(TAG, "MetaWearManager.onServiceConnected");
+        Log("MetaWearManager.onServiceConnected");
         serviceBinder = (BtleService.LocalBinder) service;
 
         if (serviceConnectedCallback != null)
@@ -103,7 +110,7 @@ public class MetaWearManager implements IActivityLifecycleHandler, ServiceConnec
 
     public MetaWearBoard GetBoard (String macAddress)
     {
-        Log.d(TAG, "GetBoard " + macAddress);
+        Log("GetBoard " + macAddress);
 
         final BluetoothDevice remoteDevice= GetBTAdapter().getRemoteDevice(macAddress);
         return serviceBinder.getMetaWearBoard(remoteDevice);
@@ -111,12 +118,13 @@ public class MetaWearManager implements IActivityLifecycleHandler, ServiceConnec
 
     public void ConnectToTheBoard (MetaWearBoard board, final IBoardConnectionHandler handler)
     {
-        Log.d(TAG, "ConnectToTheBoard");
+        Log("ConnectToTheBoard");
 
         board.connectAsync().continueWith((Continuation<Void, Void>) task -> {
             if (task.isFaulted()) {
                 this.handler.post(() -> handler.OnFailed());
             } else {
+                Log("Connected, board: " + board.getModelString());
                 this.handler.post(() -> handler.OnConnected());
             }
             return null;
@@ -127,21 +135,36 @@ public class MetaWearManager implements IActivityLifecycleHandler, ServiceConnec
 
     public de.horizont.metawearunity.Accelerometer GetAcceleromenter (MetaWearBoard board)
     {
-        return new de.horizont.metawearunity.Accelerometer(handler, board);
+        return new de.horizont.metawearunity.Accelerometer(handler, board, loggable);
     }
 
     public Magnetometer GetMagnetometer (MetaWearBoard board)
     {
-        return new Magnetometer(handler, board);
+        return new Magnetometer(handler, board,loggable);
     }
 
     public Gyro GetGyro (MetaWearBoard board)
     {
-        return new Gyro(handler, board);
+        return new Gyro(handler, board,loggable);
     }
 
     public Light GetLight (MetaWearBoard board)
     {
-        return new Light(handler, board);
+        return new Light(handler, board,loggable);
+    }
+
+    public Barometer GetBarometer (MetaWearBoard board)
+    {
+        return new Barometer(handler, board, loggable);
+    }
+
+    public FusionSensor GetFusionSensor (MetaWearBoard board)
+    {
+        return new FusionSensor(handler, board, loggable);
+    }
+
+    public void Disconnect (MetaWearBoard board)
+    {
+        board.disconnectAsync();
     }
 }

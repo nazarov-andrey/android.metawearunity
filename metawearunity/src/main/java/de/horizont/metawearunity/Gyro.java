@@ -15,20 +15,20 @@ import bolts.Continuation;
 public class Gyro extends AbstractSensor<Gyro, GyroBmi160, IGyroHandler> {
     private static String TAG = "MetaWearGyro";
 
-    public Gyro(Handler handler, MetaWearBoard board) {
-        super(handler, board, GyroBmi160.class);
+    public Gyro(Handler handler, MetaWearBoard board, boolean loggable) {
+        super(handler, board, GyroBmi160.class, loggable);
     }
 
     @Override
     public void Start(IGyroHandler handler) {
-        Log.d(TAG, "Gyro.Start");
+        Log("Gyro.Start");
         sensor.angularVelocity().addRouteAsync(source -> source.stream((Subscriber) (data, env) -> {
             AngularVelocity angularVelocity = data.value(AngularVelocity.class);
             float x = angularVelocity.x();
             float y = angularVelocity.y();
             float z = angularVelocity.z();
 
-            Log.i(TAG, "Gyro.angularVelocity " + x + " " + y + " " + z);
+            Log("Gyro.angularVelocity " + x + " " + y + " " + z);
 
             this.handler.post(() -> handler.OnNewValue(x, y, z));
         })).continueWith((Continuation<Route, Void>) task -> {
@@ -40,7 +40,7 @@ public class Gyro extends AbstractSensor<Gyro, GyroBmi160, IGyroHandler> {
 
     @Override
     public void Stop() {
-        Log.d(TAG, "Gyro.Stop");
+        Log("Gyro.Stop");
         sensor.stop();
     }
 }

@@ -13,17 +13,17 @@ import bolts.Continuation;
 public class Light extends AbstractSensor<Light, AmbientLightLtr329, ILightHandler> {
     private static String TAG = "MetaWearLight";
 
-    public Light(Handler handler, MetaWearBoard board) {
-        super(handler, board, AmbientLightLtr329.class);
+    public Light(Handler handler, MetaWearBoard board, boolean loggable) {
+        super(handler, board, AmbientLightLtr329.class, loggable);
     }
 
     @Override
     public void Start(ILightHandler handler) {
-        Log.d(TAG, "Light.Start");
+        Log("Light.Start");
         sensor.illuminance().addRouteAsync(source -> source.stream((Subscriber) (data, env) -> {
             float light = data.value(Float.class);
 
-            Log.i(TAG, "Light.light " + light);
+            Log("Light.light " + light);
 
             this.handler.post(() -> handler.OnNewValue(light));
         })).continueWith((Continuation<Route, Void>) task -> {
@@ -34,6 +34,6 @@ public class Light extends AbstractSensor<Light, AmbientLightLtr329, ILightHandl
 
     @Override
     public void Stop() {
-        Log.d(TAG, "Light.Stop");
+        Log("Light.Stop");
     }
 }
